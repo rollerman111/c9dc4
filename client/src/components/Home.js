@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
-import { Grid, CssBaseline, Button } from '@material-ui/core';
+import { Box, CssBaseline, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { SidebarContainer } from '../components/Sidebar';
@@ -10,7 +10,13 @@ import { SocketContext } from '../context/socket';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    height: '100vh',
+    height: 'calc(100vh - 64px)',
+    display: 'flex',
+
+    
+    "@media (max-width: 700px)": {
+      flexWrap: 'wrap'
+    }
   },
 }));
 
@@ -238,7 +244,7 @@ const Home = ({ user, logout }) => {
   return (
     <>
       <Button onClick={handleLogout}>Logout</Button>
-      <Grid container component="main" className={classes.root}>
+      <Box component="main" className={classes.root}>
         <CssBaseline />
         <SidebarContainer
           conversations={conversations}
@@ -253,7 +259,7 @@ const Home = ({ user, logout }) => {
           user={user}
           postMessage={postMessage}
         />
-      </Grid>
+      </Box>
     </>
   );
 };
