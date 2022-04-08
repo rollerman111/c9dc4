@@ -14,6 +14,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+
+const sortConversationsByMessageOrder = (conversations) => {
+  conversations.sort((copyOne, copyTwo) => new Date(copyTwo.messages.at(-1).createdAt) - new Date(copyOne.messages.at(-1).createdAt))
+} 
+
 const Home = ({ user, logout }) => {
   const history = useHistory();
 
@@ -42,10 +47,13 @@ const Home = ({ user, logout }) => {
       }
     });
 
+
+    sortConversationsByMessageOrder(newState)
     setConversations(newState);
   };
 
   const clearSearchedUsers = () => {
+
     setConversations((prev) => prev.filter((convo) => convo.id));
   };
 
@@ -87,7 +95,8 @@ const Home = ({ user, logout }) => {
           convo.id = message.conversationId;
         }
       });
-      setConversations(conversations);
+      sortConversationsByMessageOrder(conversations)
+      setConversations(prevState => [...prevState]);
     },
     [setConversations, conversations]
   );
@@ -103,7 +112,11 @@ const Home = ({ user, logout }) => {
           messages: [message],
         };
         newConvo.latestMessageText = message.text;
-        setConversations((prev) => [newConvo, ...prev]);
+
+        const newState = [newConvo, ...conversations]
+        sortConversationsByMessageOrder(newState)
+        setConversations(newState);
+        return
       }
 
       conversations.forEach((convo) => {
@@ -112,7 +125,8 @@ const Home = ({ user, logout }) => {
           convo.latestMessageText = message.text;
         }
       });
-      setConversations(conversations);
+      sortConversationsByMessageOrder(conversations)
+      setConversations([...conversations]);
     },
     [setConversations, conversations]
   );
@@ -183,6 +197,7 @@ const Home = ({ user, logout }) => {
     const fetchConversations = async () => {
       try {
         const { data } = await axios.get('/api/conversations');
+        sortConversationsByMessageOrder(data)
         setConversations(data);
       } catch (error) {
         console.error(error);
