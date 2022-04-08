@@ -70,9 +70,9 @@ const Home = ({ user, logout }) => {
     });
   };
 
-  const postMessage = (body) => {
+  const postMessage = async (body) => {
     try {
-      const data = saveMessage(body);
+      const data = await saveMessage(body);
 
       if (!body.conversationId) {
         addNewConvo(body.recipientId, data.message);
@@ -90,6 +90,8 @@ const Home = ({ user, logout }) => {
     (recipientId, message) => {
       conversations.forEach((convo) => {
         if (convo.otherUser.id === recipientId) {
+          // alert other user that a new conversation was created
+          socket.emit("join-room", message.conversationId, recipientId)
           convo.messages.push(message);
           convo.latestMessageText = message.text;
           convo.id = message.conversationId;
@@ -118,6 +120,8 @@ const Home = ({ user, logout }) => {
         setConversations(newState);
         return
       }
+
+      console.log(message)
 
       conversations.forEach((convo) => {
         if (convo.id === message.conversationId) {
@@ -163,6 +167,18 @@ const Home = ({ user, logout }) => {
     );
   }, []);
 
+  const newConversation = useCallback(async () => {
+    try {
+
+      const { data } = await axios.get("/api/conversations")
+      sortConversationsByMessageOrder(data)
+      setConversations(data)
+
+    } catch (err) {
+      console.log(err)
+    }
+  }, [socket])
+
   // Lifecycle
 
   useEffect(() => {
@@ -170,6 +186,7 @@ const Home = ({ user, logout }) => {
     socket.on('add-online-user', addOnlineUser);
     socket.on('remove-offline-user', removeOfflineUser);
     socket.on('new-message', addMessageToConversation);
+    socket.on('new-conversation', newConversation)
 
     return () => {
       // before the component is destroyed
@@ -178,7 +195,7 @@ const Home = ({ user, logout }) => {
       socket.off('remove-offline-user', removeOfflineUser);
       socket.off('new-message', addMessageToConversation);
     };
-  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, socket]);
+  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, newConversation, socket]);
 
   useEffect(() => {
     // when fetching, prevent redirect
@@ -197,6 +214,10 @@ const Home = ({ user, logout }) => {
     const fetchConversations = async () => {
       try {
         const { data } = await axios.get('/api/conversations');
+        for (const conversation of data) {
+          socket.emit("join-room", conversation.id);
+        }
+
         sortConversationsByMessageOrder(data)
         setConversations(data);
       } catch (error) {
