@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 const sortConversationsByMessageOrder = (conversations) => {
-  conversations.sort((copyOne, copyTwo) => new Date(copyTwo.messages.at(-1).createdAt) - new Date(copyOne.messages.at(-1).createdAt))
+  conversations.sort((copyOne, copyTwo) => new Date(copyTwo.messages.at(-1)?.createdAt) - new Date(copyOne.messages.at(-1)?.createdAt))
 } 
 
 const Home = ({ user, logout }) => {
@@ -53,8 +53,6 @@ const Home = ({ user, logout }) => {
       }
     });
 
-
-    sortConversationsByMessageOrder(newState)
     setConversations(newState);
   };
 
@@ -176,9 +174,13 @@ const Home = ({ user, logout }) => {
   const newConversation = useCallback(async () => {
     try {
 
-      const { data } = await axios.get("/api/conversations")
-      sortConversationsByMessageOrder(data)
-      setConversations(data)
+        const { data } = await axios.get('/api/conversations');
+        for (const conversation of data) {
+          socket.emit("join-room", conversation.id);
+        }
+
+        sortConversationsByMessageOrder(data)
+        setConversations(data);
 
     } catch (err) {
       console.log(err)
