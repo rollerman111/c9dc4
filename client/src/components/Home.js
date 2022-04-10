@@ -86,6 +86,8 @@ const Home = ({ user, logout }) => {
     (recipientId, message) => {
       setConversations(prev => prev.map((convo) => {
         if(convo.otherUser.id === recipientId) {
+          // join new conversation room
+          socket.emit("join-room", message.conversationId)
           const convoCopy = { ...convo }
           convoCopy.messages.push(message);
           convoCopy.latestMessageText = message.text;
@@ -96,7 +98,7 @@ const Home = ({ user, logout }) => {
         }
       }))
     },
-    [setConversations, conversations]
+    [setConversations]
   );
 
   const addMessageToConversation = useCallback(
