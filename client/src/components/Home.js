@@ -98,7 +98,7 @@ const Home = ({ user, logout }) => {
         }
       }))
     },
-    [setConversations]
+    [setConversations, socket]
   );
 
   const addMessageToConversation = useCallback(
@@ -127,7 +127,7 @@ const Home = ({ user, logout }) => {
         }
       }));
     },
-    [setConversations, conversations]
+    [setConversations]
   );
 
   const setActiveChat = (username) => {
@@ -211,7 +211,7 @@ const Home = ({ user, logout }) => {
     if (!user.isFetching) {
       fetchConversations();
     }
-  }, [user]);
+  }, [user, socket]);
 
   const handleLogout = async () => {
     if (user && user.id) {
