@@ -10,11 +10,11 @@ const useStyles = makeStyles(() => ({
     flexDirection: 'column',
   },
   chatContainer: {
-    paddingLeft: 41,
-    paddingRight: 41,
+    marginLeft: 41,
+    marginRight: 41,
     display: 'flex',
     flexDirection: 'column',
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'space-between',
     overflow: 'auto'
   },
@@ -54,16 +54,17 @@ const ActiveChat = ({
                   otherUser={conversation.otherUser}
                   userId={user.id}
                 />
-
-              </>
-            )}
-          </Box>
-          <Input
+              <Input
                   otherUser={conversation.otherUser}
                   conversationId={conversation.id || null}
                   user={user}
                   postMessage={postMessage}
                 />
+
+              </>
+            )}
+          </Box>
+
         </>
       )}
     </Box>

@@ -42,12 +42,9 @@ io.on("connection", (socket) => {
     socket.join(`user ${id}`)
   });
 
-  socket.on("join-room", (conversationId, userId = null) => {
+  socket.on("join-room", (conversationId) => {
     socket.join(`room ${conversationId}`)
-    // userId given only when a new conversation is made to alert the otherUser
-    if(userId !== null && onlineUsers.includes(userId)) {
-      socket.to(`user ${userId}`).emit("new-conversation")
-    }
+
   })
 
   socket.on("new-message", (data) => {

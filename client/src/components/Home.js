@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
-import { Box, CssBaseline, Button } from '@material-ui/core';
+import { Grid, CssBaseline, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { SidebarContainer } from '../components/Sidebar';
@@ -10,20 +10,12 @@ import { SocketContext } from '../context/socket';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    height: 'calc(100vh - 64px)',
-    display: 'flex',
-
-    
-    "@media (max-width: 700px)": {
-      flexWrap: 'wrap'
-    }
+    height: '100vh',
   },
 }));
 
 
-const sortConversationsByMessageOrder = (conversations) => {
-  conversations.sort((copyOne, copyTwo) => new Date(copyTwo.messages.at(-1)?.createdAt) - new Date(copyOne.messages.at(-1)?.createdAt))
-} 
+
 
 const Home = ({ user, logout }) => {
   const history = useHistory();
@@ -92,17 +84,17 @@ const Home = ({ user, logout }) => {
 
   const addNewConvo = useCallback(
     (recipientId, message) => {
-      conversations.forEach((convo) => {
-        if (convo.otherUser.id === recipientId) {
-          // alert other user that a new conversation was created
-          socket.emit("join-room", message.conversationId, recipientId)
-          convo.messages.push(message);
-          convo.latestMessageText = message.text;
-          convo.id = message.conversationId;
+      setConversations(prev => prev.map((convo) => {
+        if(convo.otherUser.id === recipientId) {
+          const convoCopy = { ...convo }
+          convoCopy.messages.push(message);
+          convoCopy.latestMessageText = message.text;
+          convoCopy.id = message.conversationId;
+          return convoCopy
+        } else {
+          return convo
         }
-      });
-      sortConversationsByMessageOrder(conversations)
-      setConversations(prevState => [...prevState]);
+      }))
     },
     [setConversations, conversations]
   );
@@ -118,23 +110,20 @@ const Home = ({ user, logout }) => {
           messages: [message],
         };
         newConvo.latestMessageText = message.text;
-
-        const newState = [newConvo, ...conversations]
-        sortConversationsByMessageOrder(newState)
-        setConversations(newState);
+        setConversations((prev) => [newConvo, ...prev])
         return
       }
 
-      console.log(message)
-
-      conversations.forEach((convo) => {
-        if (convo.id === message.conversationId) {
-          convo.messages.push(message);
-          convo.latestMessageText = message.text;
+      setConversations(prev => prev.map(convo => {
+        if(convo.id === message.conversationId) {
+          const convoCopy = { ...convo };
+          convoCopy.messages.push(message);
+          convoCopy.latestMessageText = message.text;
+          return convoCopy
+        } else {
+          return convo
         }
-      });
-      sortConversationsByMessageOrder(conversations)
-      setConversations([...conversations]);
+      }));
     },
     [setConversations, conversations]
   );
@@ -171,21 +160,7 @@ const Home = ({ user, logout }) => {
     );
   }, []);
 
-  const newConversation = useCallback(async () => {
-    try {
 
-        const { data } = await axios.get('/api/conversations');
-        for (const conversation of data) {
-          socket.emit("join-room", conversation.id);
-        }
-
-        sortConversationsByMessageOrder(data)
-        setConversations(data);
-
-    } catch (err) {
-      console.log(err)
-    }
-  }, [socket])
 
   // Lifecycle
 
@@ -194,7 +169,7 @@ const Home = ({ user, logout }) => {
     socket.on('add-online-user', addOnlineUser);
     socket.on('remove-offline-user', removeOfflineUser);
     socket.on('new-message', addMessageToConversation);
-    socket.on('new-conversation', newConversation)
+
 
     return () => {
       // before the component is destroyed
@@ -203,7 +178,7 @@ const Home = ({ user, logout }) => {
       socket.off('remove-offline-user', removeOfflineUser);
       socket.off('new-message', addMessageToConversation);
     };
-  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, newConversation, socket]);
+  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, socket]);
 
   useEffect(() => {
     // when fetching, prevent redirect
@@ -226,7 +201,6 @@ const Home = ({ user, logout }) => {
           socket.emit("join-room", conversation.id);
         }
 
-        sortConversationsByMessageOrder(data)
         setConversations(data);
       } catch (error) {
         console.error(error);
@@ -246,7 +220,7 @@ const Home = ({ user, logout }) => {
   return (
     <>
       <Button onClick={handleLogout}>Logout</Button>
-      <Box component="main" className={classes.root}>
+      <Grid container component="main" className={classes.root}>
         <CssBaseline />
         <SidebarContainer
           conversations={conversations}
@@ -261,7 +235,7 @@ const Home = ({ user, logout }) => {
           user={user}
           postMessage={postMessage}
         />
-      </Box>
+      </Grid>
     </>
   );
 };
