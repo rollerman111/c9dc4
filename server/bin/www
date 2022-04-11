@@ -38,14 +38,10 @@ io.on("connection", (socket) => {
     }
     // send the user who just went online to everyone else who is already online
     socket.broadcast.emit("add-online-user", id);
-    // personal room for each user with userId
-    socket.join(`user ${id}`)
+
   });
 
-  socket.on("join-room", (conversationId) => {
-    socket.join(`room ${conversationId}`)
 
-  })
 
   socket.on("new-message", (data) => {
     socket.to(`room ${data.message.conversationId}`).emit("new-message", {
@@ -59,10 +55,6 @@ io.on("connection", (socket) => {
       userIndex = onlineUsers.indexOf(id);
       onlineUsers.splice(userIndex, 1);
       socket.broadcast.emit("remove-offline-user", id);
-      // leave all rooms
-      socket.rooms.forEach((room) => {
-        socket.leave(room)
-      })
     }
   });
 });
