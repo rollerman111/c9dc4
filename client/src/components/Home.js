@@ -86,8 +86,6 @@ const Home = ({ user, logout }) => {
     (recipientId, message) => {
       setConversations(prev => prev.map((convo) => {
         if(convo.otherUser.id === recipientId) {
-          // join new conversation room
-          socket.emit("join-room", message.conversationId)
           const convoCopy = { ...convo }
           convoCopy.messages.push(message);
           convoCopy.latestMessageText = message.text;
@@ -199,10 +197,6 @@ const Home = ({ user, logout }) => {
     const fetchConversations = async () => {
       try {
         const { data } = await axios.get('/api/conversations');
-        for (const conversation of data) {
-          socket.emit("join-room", conversation.id);
-        }
-
         setConversations(data);
       } catch (error) {
         console.error(error);

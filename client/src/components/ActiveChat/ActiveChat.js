@@ -15,8 +15,7 @@ const useStyles = makeStyles(() => ({
     display: 'flex',
     flexDirection: 'column',
     flexGrow: 1,
-    justifyContent: 'space-between',
-    overflow: 'auto'
+    justifyContent: 'space-between'
   },
 }));
 
