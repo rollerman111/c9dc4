@@ -8,10 +8,9 @@ const Messages = (props) => {
   const lastMessage = messages.at(-1)
 
   useEffect(() => {
-
-
-    if(messages.filter((message) => message.seen === false && message.senderId !== userId).length !== 0) 
+    if(userId && messages.filter((message) => message.seen === false && message.senderId !== userId).length !== 0) {
       clearSeenAlerts(conversationId)
+    }
 
   }, [conversationId, messages, clearSeenAlerts, userId])
 

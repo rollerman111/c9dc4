@@ -18,6 +18,13 @@ const useStyles = makeStyles((theme) => ({
     color: "#9CADC8",
     letterSpacing: -0.17,
   },
+  previewTextUnseen: {
+    fontSize: 12,
+    color: 'black',
+    letterSpacing: -0.17,
+    fontWeight: 'bold',
+    
+  },
   alertBubble: {
     position: 'relative',
 
@@ -63,7 +70,7 @@ const ChatContent = ({ conversation }) => {
         <Typography className={classes.username}>
           {otherUser.username}
         </Typography>
-        <Typography className={classes.previewText}>
+        <Typography className={notSeenCount === 0 ? classes.previewText : classes.previewTextUnseen}>
           {latestMessageText}
         </Typography>
         </Box>

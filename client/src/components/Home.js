@@ -110,6 +110,7 @@ const Home = ({ user, logout }) => {
           messages: [message],
         };
         newConvo.latestMessageText = message.text;
+        newConvo.notSeenCount = 1 
         setConversations((prev) => [newConvo, ...prev])
         return
       }
