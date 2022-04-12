@@ -115,17 +115,6 @@ const Home = ({ user, logout }) => {
         return
       }
 
-      /*
-      if(message.senderId !== user.id) {
-        const index = conversations.findIndex((conversation) => conversation.otherUser.username === activeConversation)
-        if(index !== -1 && conversations[index].id === message.conversationId) {
-          socket.emit("read-message", message.conversationId, message.senderId)
-          message.seen = true
-          updateDatabaseMessages(message.conversationId)
-        }
-      }
-      */
-
       setConversations(prev => prev.map(convo => {
         if(convo.id === message.conversationId) {
           const convoCopy = { ...convo };
