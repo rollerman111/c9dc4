@@ -76,13 +76,9 @@ router.put("/:conversationId", async (req, res, next) => {
       }
     })
 
-    const messages = await Message.findAll({
-      where: {
-        conversationId: conversationId
-      }
-    })
 
-    res.json({ messages })
+
+    res.json({ "success": "successfully updated messages" })
 
   } catch (err) {
     next(err)

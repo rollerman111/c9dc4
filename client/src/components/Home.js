@@ -96,7 +96,7 @@ const Home = ({ user, logout }) => {
         }
       }))
     },
-    [setConversations, socket]
+    [setConversations]
   );
 
   const addMessageToConversation = useCallback(
@@ -114,18 +114,44 @@ const Home = ({ user, logout }) => {
         return
       }
 
+      /*
+      if(message.senderId !== user.id) {
+        const index = conversations.findIndex((conversation) => conversation.otherUser.username === activeConversation)
+        if(index !== -1 && conversations[index].id === message.conversationId) {
+          socket.emit("read-message", message.conversationId, message.senderId)
+          message.seen = true
+          updateDatabaseMessages(message.conversationId)
+        }
+      }
+      */
+
       setConversations(prev => prev.map(convo => {
         if(convo.id === message.conversationId) {
           const convoCopy = { ...convo };
+          
+
+
           convoCopy.messages.push(message);
           convoCopy.latestMessageText = message.text;
+          if(message.senderId !== user.id) {
+            if(convoCopy.otherUser.username === activeConversation) {
+              socket.emit("read-message", message.conversationId, message.senderId)
+              message.seen = true
+              updateDatabaseMessages(message.conversationId)
+            } else {
+              convoCopy.notSeenCount += 1
+            }
+            
+          }  
+
           return convoCopy
+
         } else {
           return convo
         }
       }));
     },
-    [setConversations]
+    [setConversations, activeConversation, user.id, socket]
   );
 
   const setActiveChat = (username) => {
@@ -162,6 +188,54 @@ const Home = ({ user, logout }) => {
 
 
 
+  const updateDatabaseMessages = async (conversationId) => {
+    try {
+
+      await axios.put(`api/messages/${conversationId}`)
+
+
+    } catch (err) {
+      console.error(err)
+    }
+
+  }
+
+
+  const clearSeenAlerts = (conversationId) => {
+
+    readMessage(conversationId)
+    updateDatabaseMessages(conversationId)
+    socket.emit("read-message", conversationId, user.id)
+
+  } 
+  
+
+
+  const readMessage = useCallback((conversationId, readerId = null) => {
+    setConversations(prev => prev.map((convo) => {
+      if(convo.id === conversationId) {
+        const convoCopy = {...convo}
+        for (const message of convoCopy.messages) {
+          if(message.seen === false && message.senderId !== user.id) {
+            message.seen = true
+            convoCopy.notSeenCount -= 1
+          }
+          if(message.senderId === user.id && readerId !== null) {
+            const lastMessage = convoCopy.messages.at(-1)
+            lastMessage.seen = true
+          }
+        }
+        return convoCopy
+      } else {
+        return convo
+      }
+    }))
+  }, [user.id])
+  
+
+
+
+
   // Lifecycle
 
   useEffect(() => {
@@ -169,6 +243,7 @@ const Home = ({ user, logout }) => {
     socket.on('add-online-user', addOnlineUser);
     socket.on('remove-offline-user', removeOfflineUser);
     socket.on('new-message', addMessageToConversation);
+    socket.on('read-message', readMessage)
 
 
     return () => {
@@ -177,8 +252,9 @@ const Home = ({ user, logout }) => {
       socket.off('add-online-user', addOnlineUser);
       socket.off('remove-offline-user', removeOfflineUser);
       socket.off('new-message', addMessageToConversation);
+      socket.off('read-message', readMessage)
     };
-  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, socket]);
+  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, readMessage, socket]);
 
   useEffect(() => {
     // when fetching, prevent redirect
@@ -230,6 +306,7 @@ const Home = ({ user, logout }) => {
           conversations={conversations}
           user={user}
           postMessage={postMessage}
+          clearSeenAlerts={clearSeenAlerts}
         />
       </Grid>
     </>
