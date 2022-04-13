@@ -64,7 +64,7 @@ router.put("/:conversationId", async (req, res, next) => {
     const { user1Id, user2Id } = conversation
 
     if(user1Id !== req.user.id && user2Id !== req.user.id) {
-      return res.sendStatus(401)
+      return res.sendStatus(403)
     }
 
     await Message.update({seen: true}, {

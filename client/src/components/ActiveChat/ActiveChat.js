@@ -56,6 +56,7 @@ const ActiveChat = ({
                   otherUser={conversation.otherUser}
                   userId={user.id}
                   clearSeenAlerts={clearSeenAlerts}
+                  notSeenCount={conversation.notSeenCount}
                 />
               <Input
                   otherUser={conversation.otherUser}

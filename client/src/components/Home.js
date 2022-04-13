@@ -202,6 +202,7 @@ const Home = ({ user, logout }) => {
     setConversations(prev => prev.map((convo) => {
       if(convo.id === conversationId) {
         const convoCopy = {...convo}
+        convoCopy.messages = [...convo.messages]
         for (const message of convoCopy.messages) {
           if(message.seen === false && message.senderId !== user.id) {
             message.seen = true

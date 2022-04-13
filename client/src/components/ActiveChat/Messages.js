@@ -4,15 +4,15 @@ import { SenderBubble, OtherUserBubble } from '.';
 import moment from 'moment';
 
 const Messages = (props) => {
-  const { messages, otherUser, userId, clearSeenAlerts, conversationId } = props;
+  const { messages, otherUser, userId, clearSeenAlerts, conversationId, notSeenCount } = props;
   const lastSeenMessage = useRef(-1)
 
   useEffect(() => {
-    if(userId && messages.filter((message) => message.seen === false && message.senderId !== userId).length !== 0) {
+    if(userId && notSeenCount != null && notSeenCount !== 0) {
       clearSeenAlerts(conversationId)
     }
 
-  }, [conversationId, messages, clearSeenAlerts, userId])
+  }, [conversationId, messages, clearSeenAlerts, userId, notSeenCount])
 
   return (
     <Box>
