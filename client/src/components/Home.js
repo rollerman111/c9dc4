@@ -14,6 +14,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+
+
+
 const Home = ({ user, logout }) => {
   const history = useHistory();
 
@@ -46,6 +49,7 @@ const Home = ({ user, logout }) => {
   };
 
   const clearSearchedUsers = () => {
+
     setConversations((prev) => prev.filter((convo) => convo.id));
   };
 
@@ -62,9 +66,9 @@ const Home = ({ user, logout }) => {
     });
   };
 
-  const postMessage = (body) => {
+  const postMessage = async (body) => {
     try {
-      const data = saveMessage(body);
+      const data = await saveMessage(body);
 
       if (!body.conversationId) {
         addNewConvo(body.recipientId, data.message);
@@ -80,16 +84,19 @@ const Home = ({ user, logout }) => {
 
   const addNewConvo = useCallback(
     (recipientId, message) => {
-      conversations.forEach((convo) => {
-        if (convo.otherUser.id === recipientId) {
-          convo.messages.push(message);
-          convo.latestMessageText = message.text;
-          convo.id = message.conversationId;
+      setConversations(prev => prev.map((convo) => {
+        if(convo.otherUser.id === recipientId) {
+          const convoCopy = { ...convo }
+          convoCopy.messages = [...convo.messages, message]
+          convoCopy.latestMessageText = message.text;
+          convoCopy.id = message.conversationId;
+          return convoCopy
+        } else {
+          return convo
         }
-      });
-      setConversations(conversations);
+      }))
     },
-    [setConversations, conversations]
+    [setConversations]
   );
 
   const addMessageToConversation = useCallback(
@@ -103,18 +110,22 @@ const Home = ({ user, logout }) => {
           messages: [message],
         };
         newConvo.latestMessageText = message.text;
-        setConversations((prev) => [newConvo, ...prev]);
+        setConversations((prev) => [newConvo, ...prev])
+        return
       }
 
-      conversations.forEach((convo) => {
-        if (convo.id === message.conversationId) {
-          convo.messages.push(message);
-          convo.latestMessageText = message.text;
+      setConversations(prev => prev.map(convo => {
+        if(convo.id === message.conversationId) {
+          const convoCopy = { ...convo };
+          convoCopy.messages = [...convo.messages, message]
+          convoCopy.latestMessageText = message.text;
+          return convoCopy
+        } else {
+          return convo
         }
-      });
-      setConversations(conversations);
+      }));
     },
-    [setConversations, conversations]
+    [setConversations]
   );
 
   const setActiveChat = (username) => {
@@ -149,6 +160,8 @@ const Home = ({ user, logout }) => {
     );
   }, []);
 
+
+
   // Lifecycle
 
   useEffect(() => {
@@ -156,6 +169,7 @@ const Home = ({ user, logout }) => {
     socket.on('add-online-user', addOnlineUser);
     socket.on('remove-offline-user', removeOfflineUser);
     socket.on('new-message', addMessageToConversation);
+
 
     return () => {
       // before the component is destroyed
@@ -191,7 +205,7 @@ const Home = ({ user, logout }) => {
     if (!user.isFetching) {
       fetchConversations();
     }
-  }, [user]);
+  }, [user, socket]);
 
   const handleLogout = async () => {
     if (user && user.id) {

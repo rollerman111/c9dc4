@@ -15,7 +15,7 @@ const useStyles = makeStyles(() => ({
     display: 'flex',
     flexDirection: 'column',
     flexGrow: 1,
-    justifyContent: 'space-between',
+    justifyContent: 'space-between'
   },
 }));
 
@@ -53,15 +53,17 @@ const ActiveChat = ({
                   otherUser={conversation.otherUser}
                   userId={user.id}
                 />
-                <Input
+              <Input
                   otherUser={conversation.otherUser}
                   conversationId={conversation.id || null}
                   user={user}
                   postMessage={postMessage}
                 />
+
               </>
             )}
           </Box>
+
         </>
       )}
     </Box>
