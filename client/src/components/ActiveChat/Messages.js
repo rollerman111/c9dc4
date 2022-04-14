@@ -12,7 +12,7 @@ const Messages = (props) => {
       clearSeenAlerts(conversationId)
     }
 
-  }, [conversationId, messages, clearSeenAlerts, userId, notSeenCount])
+  }, [conversationId, clearSeenAlerts, userId, notSeenCount])
 
   return (
     <Box>

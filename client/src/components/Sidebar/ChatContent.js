@@ -60,7 +60,7 @@ const ChatContent = ({ conversation }) => {
 
   const { otherUser, notSeenCount } = conversation;
   const latestMessageText = conversation.id && conversation.latestMessageText;
-
+  console.log(notSeenCount)
 
   return (
     <Box className={classes.root}>
@@ -70,7 +70,7 @@ const ChatContent = ({ conversation }) => {
         <Typography className={classes.username}>
           {otherUser.username}
         </Typography>
-        <Typography className={notSeenCount === 0 ? classes.previewText : classes.previewTextUnseen}>
+        <Typography className={notSeenCount === 0 || notSeenCount == null ? classes.previewText : classes.previewTextUnseen}>
           {latestMessageText}
         </Typography>
         </Box>
