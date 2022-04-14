@@ -60,7 +60,6 @@ const ChatContent = ({ conversation }) => {
 
   const { otherUser, notSeenCount } = conversation;
   const latestMessageText = conversation.id && conversation.latestMessageText;
-  console.log(notSeenCount)
 
   return (
     <Box className={classes.root}>
