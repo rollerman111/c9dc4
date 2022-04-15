@@ -122,7 +122,7 @@ const Home = ({ user, logout }) => {
           convoCopy.latestMessageText = message.text;
           if(message.senderId !== user.id) {
             if(convoCopy.otherUser.username === activeConversation) {
-              socket.emit("read-message", message.conversationId, message.senderId)
+              socket.emit("read-message", message.conversationId, user.id)
               message.seen = true
               updateDatabaseMessages(message.conversationId)
             } else {
@@ -204,13 +204,12 @@ const Home = ({ user, logout }) => {
         const convoCopy = {...convo}
         convoCopy.messages = [...convo.messages]
         for (const message of convoCopy.messages) {
-          if(message.seen === false && message.senderId !== user.id) {
+          if(readerId === null && message.seen === false && message.senderId !== user.id) {
             message.seen = true
             convoCopy.notSeenCount -= 1
           }
-          if(message.senderId === user.id && readerId !== null) {
-            const lastMessage = convoCopy.messages.at(-1)
-            lastMessage.seen = true
+          if(readerId && message.seen === false && message.senderId === user.id) {
+            message.seen = true
           }
         }
         return convoCopy
