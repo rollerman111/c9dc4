@@ -177,16 +177,11 @@ const Home = ({ user, logout }) => {
 
   const updateDatabaseMessages = async (conversationId) => {
     try {
-
       await axios.put(`api/messages/${conversationId}`)
-
-
     } catch (err) {
       console.error(err)
     }
-
   }
-
 
   const clearSeenAlerts = (conversationId) => {
 
@@ -204,11 +199,11 @@ const Home = ({ user, logout }) => {
         const convoCopy = {...convo}
         convoCopy.messages = [...convo.messages]
         for (const message of convoCopy.messages) {
-          if(readerId === null && message.seen === false && message.senderId !== user.id) {
+          if(readerId === null && !message.seen && message.senderId !== user.id) {
             message.seen = true
             convoCopy.notSeenCount -= 1
           }
-          if(readerId && message.seen === false && message.senderId === user.id) {
+          if(readerId && !message.seen && message.senderId === user.id) {
             message.seen = true
           }
         }
@@ -268,7 +263,7 @@ const Home = ({ user, logout }) => {
     if (!user.isFetching) {
       fetchConversations();
     }
-  }, [user, socket]);
+  }, [user]);
 
   const handleLogout = async () => {
     if (user && user.id) {

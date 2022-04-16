@@ -19,7 +19,7 @@ const Messages = (props) => {
       {messages.map((message) => {
         const time = moment(message.createdAt).format('h:mm');
 
-        if(message.seen === true && message.senderId === userId) {
+        if(message.seen && message.senderId === userId) {
           lastSeenMessage.current = message.id
         }
 

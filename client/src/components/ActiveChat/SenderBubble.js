@@ -45,13 +45,12 @@ const SenderBubble = ({id, time, text, otherUser, lastSeenMessage }) => {
       <Box className={classes.bubble}>
         <Typography className={classes.text}>{text}</Typography>
       </Box>
-      {lastSeenMessage.current === id ? 
+      {lastSeenMessage.current === id && 
         <Avatar
           alt={otherUser.username}
           src={otherUser.photoUrl}
           className={classes.avatar}
         />
-      : <></>
       }
 
     </Box>

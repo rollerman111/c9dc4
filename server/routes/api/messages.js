@@ -78,7 +78,7 @@ router.put("/:conversationId", async (req, res, next) => {
 
 
 
-    res.json({ "success": "successfully updated messages" })
+    res.sendStatus(204)
 
   } catch (err) {
     next(err)

@@ -73,10 +73,10 @@ const ChatContent = ({ conversation }) => {
           {latestMessageText}
         </Typography>
         </Box>
-        {notSeenCount !== 0 && notSeenCount ?
+        {notSeenCount !== 0 && notSeenCount &&
           <Badge overlap="rectangular" badgeContent={notSeenCount} color="primary" className={classes.alertBubble}>
           </Badge>
-          : <></>}
+          }
       </Box>
     </Box>
   );
