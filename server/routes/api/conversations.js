@@ -67,10 +67,25 @@ router.get("/", async (req, res, next) => {
         convoJSON.otherUser.online = false;
       }
 
+
+      const notSeenCount = convoJSON.messages.reduce((count, message) => {
+        if(message.seen === false && message.senderId !== userId) {
+          count += 1
+        }
+        return count
+      }, 0)
+      
       // set properties for notification count and latest message preview
+      convoJSON.notSeenCount = notSeenCount
       convoJSON.latestMessageText = convoJSON.messages.at(-1).text;
       conversations[i] = convoJSON;
+      
+
     }
+
+
+
+
 
     res.json(conversations);
   } catch (error) {

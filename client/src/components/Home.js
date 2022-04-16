@@ -110,6 +110,7 @@ const Home = ({ user, logout }) => {
           messages: [message],
         };
         newConvo.latestMessageText = message.text;
+        newConvo.notSeenCount = 1 
         setConversations((prev) => [newConvo, ...prev])
         return
       }
@@ -119,13 +120,25 @@ const Home = ({ user, logout }) => {
           const convoCopy = { ...convo };
           convoCopy.messages = [...convo.messages, message]
           convoCopy.latestMessageText = message.text;
+          if(message.senderId !== user.id) {
+            if(convoCopy.otherUser.username === activeConversation) {
+              socket.emit("read-message", message.conversationId, user.id)
+              message.seen = true
+              updateDatabaseMessages(message.conversationId)
+            } else {
+              convoCopy.notSeenCount += 1
+            }
+            
+          }  
+
           return convoCopy
+
         } else {
           return convo
         }
       }));
     },
-    [setConversations]
+    [setConversations, activeConversation, user.id, socket]
   );
 
   const setActiveChat = (username) => {
@@ -162,6 +175,49 @@ const Home = ({ user, logout }) => {
 
 
 
+  const updateDatabaseMessages = async (conversationId) => {
+    try {
+      await axios.put(`api/messages/${conversationId}`)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const clearSeenAlerts = (conversationId) => {
+
+    readMessage(conversationId)
+    updateDatabaseMessages(conversationId)
+    socket.emit("read-message", conversationId, user.id)
+
+  } 
+  
+
+
+  const readMessage = useCallback((conversationId, readerId = null) => {
+    setConversations(prev => prev.map((convo) => {
+      if(convo.id === conversationId) {
+        const convoCopy = {...convo}
+        convoCopy.messages = [...convo.messages]
+        for (const message of convoCopy.messages) {
+          if(readerId === null && !message.seen && message.senderId !== user.id) {
+            message.seen = true
+            convoCopy.notSeenCount -= 1
+          }
+          if(readerId && !message.seen && message.senderId === user.id) {
+            message.seen = true
+          }
+        }
+        return convoCopy
+      } else {
+        return convo
+      }
+    }))
+  }, [user.id])
+  
+
+
+
+
   // Lifecycle
 
   useEffect(() => {
@@ -169,6 +225,7 @@ const Home = ({ user, logout }) => {
     socket.on('add-online-user', addOnlineUser);
     socket.on('remove-offline-user', removeOfflineUser);
     socket.on('new-message', addMessageToConversation);
+    socket.on('read-message', readMessage)
 
 
     return () => {
@@ -177,8 +234,9 @@ const Home = ({ user, logout }) => {
       socket.off('add-online-user', addOnlineUser);
       socket.off('remove-offline-user', removeOfflineUser);
       socket.off('new-message', addMessageToConversation);
+      socket.off('read-message', readMessage)
     };
-  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, socket]);
+  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, readMessage, socket]);
 
   useEffect(() => {
     // when fetching, prevent redirect
@@ -205,7 +263,7 @@ const Home = ({ user, logout }) => {
     if (!user.isFetching) {
       fetchConversations();
     }
-  }, [user, socket]);
+  }, [user]);
 
   const handleLogout = async () => {
     if (user && user.id) {
@@ -230,6 +288,7 @@ const Home = ({ user, logout }) => {
           conversations={conversations}
           user={user}
           postMessage={postMessage}
+          clearSeenAlerts={clearSeenAlerts}
         />
       </Grid>
     </>

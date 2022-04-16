@@ -49,6 +49,10 @@ io.on("connection", (socket) => {
       sender: data.sender,
     });
   });
+  
+  socket.on("read-message", (conversationId, readerId) => {
+    socket.broadcast.emit("read-message", conversationId, readerId)
+  });
 
   socket.on("logout", (id) => {
     if (onlineUsers.includes(id)) {
@@ -57,6 +61,8 @@ io.on("connection", (socket) => {
       socket.broadcast.emit("remove-offline-user", id);
     }
   });
+
+
 });
 
 sessionStore

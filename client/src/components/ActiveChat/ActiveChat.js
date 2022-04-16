@@ -3,6 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Box } from '@material-ui/core';
 import { Input, Header, Messages } from './index';
 
+
 const useStyles = makeStyles(() => ({
   root: {
     display: 'flex',
@@ -24,6 +25,7 @@ const ActiveChat = ({
   conversations,
   activeConversation,
   postMessage,
+  clearSeenAlerts
 }) => {
   const classes = useStyles();
 
@@ -49,9 +51,12 @@ const ActiveChat = ({
             {user && (
               <>
                 <Messages
+                  conversationId={conversation.id}
                   messages={conversation.messages}
                   otherUser={conversation.otherUser}
                   userId={user.id}
+                  clearSeenAlerts={clearSeenAlerts}
+                  notSeenCount={conversation.notSeenCount}
                 />
               <Input
                   otherUser={conversation.otherUser}
